@@ -3,15 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Vocal Pitch Gate — Do Re Mi 聲控闖關</title>
+  <title>Do Re Mi 聲控闖關</title>
   <style>
     :root {
-      --bg-dark: #0e1015;
-      --panel-border: rgba(255, 255, 255, 0.12);
-      --hud-bg: rgba(16, 19, 27, 0.78);
-      --accent: #ff8c24;
-      --accent-green: #22c55e;
-      --accent-yellow: #facc15;
+      --hud-bg: rgba(15, 18, 25, 0.72);
+      --hud-border: rgba(255, 255, 255, 0.16);
       --text-main: #f8fafc;
       --text-muted: #94a3b8;
     }
@@ -27,141 +23,18 @@
       width: 100%;
       height: 100%;
       overflow: hidden;
-      background: var(--bg-dark);
+      background: #0a0c12;
       color: var(--text-main);
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang TC", "Noto Sans TC", sans-serif;
     }
 
-    /* Top HUD */
-    .top-hud {
-      position: fixed;
-      top: 12px;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 30;
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      justify-content: center;
-      gap: 8px 12px;
-      max-width: calc(100vw - 24px);
-      padding: 8px 14px;
-      border-radius: 16px;
-      background: var(--hud-bg);
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
-      border: 1px solid var(--panel-border);
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
-    }
-
-    .stage-strip {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-
-    .stage-pill {
-      padding: 4px 8px;
-      border-radius: 999px;
-      font-size: 12px;
-      font-weight: 700;
-      letter-spacing: 0.02em;
-      background: rgba(255, 255, 255, 0.07);
-      color: var(--text-muted);
-      border: 1px solid transparent;
-      transition: all 0.2s ease;
-    }
-
-    .stage-pill.done {
-      background: rgba(34, 197, 94, 0.2);
-      color: #86efac;
-      border-color: rgba(34, 197, 94, 0.45);
-    }
-
-    .stage-pill.active {
-      background: rgba(255, 140, 36, 0.26);
-      color: #fed7aa;
-      border-color: #fb923c;
-      transform: scale(1.06);
-      box-shadow: 0 0 12px rgba(251, 146, 60, 0.45);
-    }
-
-    .hud-divider {
-      width: 1px;
-      height: 22px;
-      background: rgba(255, 255, 255, 0.14);
-    }
-
-    .controls-group {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .hud-btn {
-      appearance: none;
-      border: 1px solid rgba(255, 255, 255, 0.16);
-      background: rgba(255, 255, 255, 0.08);
-      color: var(--text-main);
-      padding: 5px 10px;
-      border-radius: 10px;
-      font-size: 12px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
-      white-space: nowrap;
-    }
-
-    .hud-btn:hover {
-      background: rgba(255, 255, 255, 0.16);
-    }
-
-    .hud-btn:active {
-      transform: scale(0.96);
-    }
-
-    .hud-btn.active {
-      background: rgba(34, 197, 94, 0.24);
-      border-color: #4ade80;
-      color: #dcfce7;
-    }
-
-    .hud-btn.primary-action {
-      background: rgba(251, 146, 60, 0.24);
-      border-color: rgba(251, 146, 60, 0.7);
-      color: #ffedd5;
-    }
-
-    .hud-btn.calibrating {
-      background: rgba(250, 204, 21, 0.26);
-      border-color: #facc15;
-      color: #fef08a;
-      animation: pulseGlow 1s infinite alternate;
-    }
-
-    @keyframes pulseGlow {
-      from { box-shadow: 0 0 0 rgba(250, 204, 21, 0.2); }
-      to { box-shadow: 0 0 14px rgba(250, 204, 21, 0.55); }
-    }
-
-    /* Main Split Screen */
-    .split-stage {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
+    /* Full-bleed AR Stage */
+    .ar-stage {
+      position: relative;
       width: 100vw;
       height: 100vh;
-      background: #090b10;
-    }
-
-    /* Left Pane: Webcam + Pitch Meter */
-    .camera-pane {
-      position: relative;
-      width: 100%;
-      height: 100%;
       overflow: hidden;
-      background: radial-gradient(circle at 35% 30%, #232838 0%, #10131b 70%, #090a0f 100%);
-      border-right: 1px solid rgba(255, 255, 255, 0.12);
+      background: radial-gradient(circle at 30% 35%, #242938 0%, #10131b 65%, #090a0f 100%);
     }
 
     #webcam {
@@ -171,21 +44,21 @@
       height: 100%;
       object-fit: cover;
       transform: scaleX(-1);
-      background: #090b10;
+      z-index: 1;
     }
 
     .camera-fallback {
       position: absolute;
       inset: 0;
+      z-index: 1;
       display: flex;
       flex-direction: column;
-      align-items: center;
+      align-items: flex-start;
       justify-content: center;
-      gap: 12px;
-      background: radial-gradient(circle at 50% 35%, rgba(56, 189, 248, 0.14), rgba(15, 23, 42, 0.96) 65%);
+      padding-left: clamp(72px, 14vw, 180px);
+      gap: 10px;
+      background: radial-gradient(circle at 28% 45%, rgba(56, 189, 248, 0.14), rgba(10, 12, 18, 0.96) 68%);
       color: #cbd5e1;
-      text-align: center;
-      padding: 24px;
     }
 
     .camera-fallback.hidden {
@@ -193,212 +66,176 @@
     }
 
     .mic-orb {
-      width: 96px;
-      height: 96px;
+      width: 82px;
+      height: 82px;
       border-radius: 50%;
       display: grid;
       place-items: center;
-      font-size: 38px;
+      font-size: 34px;
       background: rgba(255, 255, 255, 0.08);
       border: 2px solid rgba(255, 255, 255, 0.2);
-      box-shadow: 0 0 36px rgba(34, 197, 94, 0.25);
-      transition: transform 0.08s linear, box-shadow 0.08s linear;
+      box-shadow: 0 0 30px rgba(34, 197, 94, 0.25);
+      transition: transform 0.06s linear;
     }
 
-    .camera-vignette {
+    #gameCanvas {
       position: absolute;
       inset: 0;
-      pointer-events: none;
-      background: linear-gradient(
-        to right,
-        rgba(0, 0, 0, 0.36) 0%,
-        rgba(0, 0, 0, 0.04) 28%,
-        rgba(0, 0, 0, 0.02) 82%,
-        rgba(0, 0, 0, 0.35) 100%
-      );
-    }
-
-    /* Vertical Pitch Capsule Meter */
-    .pitch-meter-wrap {
-      position: absolute;
-      left: 26px;
-      top: 10%;
-      bottom: 14%;
-      display: flex;
-      align-items: stretch;
-      gap: 10px;
-      z-index: 10;
-      pointer-events: none;
-    }
-
-    .pitch-bar-track {
-      position: relative;
-      width: 24px;
+      width: 100%;
       height: 100%;
-      border-radius: 999px;
-      background: rgba(255, 255, 255, 0.22);
-      border: 2px solid rgba(255, 255, 255, 0.45);
-      box-shadow: 0 6px 24px rgba(0, 0, 0, 0.45);
-      overflow: hidden;
-      backdrop-filter: blur(6px);
+      display: block;
+      z-index: 2;
+      pointer-events: none;
     }
 
-    .pitch-bar-fill {
+    /* Minimalist Left Volume Bar (Pure Loudness Meter matching reference) */
+    .volume-capsule {
+      position: fixed;
+      left: clamp(24px, 8vw, 96px);
+      bottom: 15vh;
+      width: 22px;
+      height: 46vh;
+      z-index: 10;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.28);
+      border: 1.5px solid rgba(255, 255, 255, 0.42);
+      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.35);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    .volume-fill {
       position: absolute;
       left: 0;
       right: 0;
       bottom: 0;
       height: 0%;
       border-radius: 999px;
-      background: linear-gradient(to top, #22c55e 0%, #84cc16 55%, #facc15 100%);
-      box-shadow: 0 0 18px rgba(132, 204, 22, 0.65);
-      transition: height 45ms linear;
+      background: linear-gradient(to top, #22c55e 0%, #84cc16 58%, #d9f99d 100%);
+      box-shadow: 0 0 14px rgba(132, 204, 22, 0.65);
     }
 
-    .pitch-target-band {
-      position: absolute;
-      left: 0;
-      right: 0;
-      background: rgba(255, 140, 36, 0.28);
-      border-top: 2px solid rgba(255, 255, 255, 0.85);
-      border-bottom: 2px solid rgba(255, 255, 255, 0.85);
-      pointer-events: none;
-      transition: bottom 0.25s ease, height 0.25s ease;
-    }
-
-    .pitch-ticks {
-      position: relative;
-      width: 56px;
-      height: 100%;
-    }
-
-    .pitch-tick {
-      position: absolute;
-      left: 0;
-      transform: translateY(50%);
+    /* Compact Top Floating Pill HUD */
+    .top-hud {
+      position: fixed;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 20;
       display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 6px 10px;
+      max-width: calc(100vw - 20px);
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: var(--hud-bg);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--hud-border);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    }
+
+    .stage-strip {
+      display: flex;
+      align-items: center;
+      gap: 3px;
+    }
+
+    .stage-pill {
+      padding: 3px 7px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text-muted);
+      border: 1px solid transparent;
+      transition: all 0.18s ease;
+    }
+
+    .stage-pill.done {
+      background: rgba(34, 197, 94, 0.22);
+      color: #86efac;
+      border-color: rgba(34, 197, 94, 0.45);
+    }
+
+    .stage-pill.active {
+      background: rgba(251, 146, 60, 0.28);
+      color: #ffedd5;
+      border-color: #fb923c;
+      transform: scale(1.06);
+    }
+
+    .hud-divider {
+      width: 1px;
+      height: 18px;
+      background: rgba(255, 255, 255, 0.16);
+    }
+
+    .controls-group {
+      display: flex;
+      flex-wrap: wrap;
       align-items: center;
       gap: 5px;
-      font-size: 12px;
-      font-weight: 700;
-      color: rgba(255, 255, 255, 0.72);
-      text-shadow: 0 1px 4px rgba(0, 0, 0, 0.9);
-      transition: color 0.18s ease, transform 0.18s ease;
     }
 
-    .pitch-tick::before {
-      content: "";
-      width: 8px;
-      height: 2px;
-      background: rgba(255, 255, 255, 0.5);
-      border-radius: 2px;
-    }
-
-    .pitch-tick.target {
-      color: #fde047;
-      font-size: 14px;
-      transform: translateY(50%) scale(1.08);
-    }
-
-    .pitch-tick.target::before {
-      width: 14px;
-      height: 3px;
-      background: #fde047;
-    }
-
-    /* Bottom Voice Readout Badge */
-    .voice-readout {
-      position: absolute;
-      left: 20px;
-      right: 20px;
-      bottom: 18px;
-      z-index: 10;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      padding: 10px 14px;
-      border-radius: 14px;
-      background: rgba(12, 15, 22, 0.78);
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.14);
-    }
-
-    .voice-note-main {
-      display: flex;
-      align-items: baseline;
-      gap: 8px;
-    }
-
-    .voice-note-label {
-      font-size: 20px;
-      font-weight: 800;
-      color: #ffffff;
-    }
-
-    .voice-hz {
-      font-size: 13px;
-      font-weight: 600;
-      color: #94a3b8;
-      font-variant-numeric: tabular-nums;
-    }
-
-    .voice-hint {
-      font-size: 13px;
-      font-weight: 700;
-      padding: 4px 10px;
-      border-radius: 999px;
+    .hud-btn {
+      appearance: none;
+      border: 1px solid rgba(255, 255, 255, 0.16);
       background: rgba(255, 255, 255, 0.08);
-      color: #cbd5e1;
+      color: var(--text-main);
+      padding: 4px 9px;
+      border-radius: 999px;
+      font-size: 11.5px;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 0.14s ease, border-color 0.14s ease, transform 0.1s ease;
+    }
+
+    .hud-btn:hover {
+      background: rgba(255, 255, 255, 0.16);
+    }
+
+    .hud-btn:active {
+      transform: scale(0.95);
+    }
+
+    .hud-btn.active {
+      background: rgba(34, 197, 94, 0.24);
+      border-color: #4ade80;
+      color: #dcfce7;
+    }
+
+    .hud-btn.primary-action {
+      background: rgba(251, 146, 60, 0.26);
+      border-color: rgba(251, 146, 60, 0.72);
+      color: #ffedd5;
+    }
+
+    .hud-btn.calibrating {
+      background: rgba(250, 204, 21, 0.26);
+      border-color: #facc15;
+      color: #fef08a;
+    }
+
+    .pitch-chip {
+      font-size: 11.5px;
+      font-weight: 700;
+      padding: 3px 9px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.09);
+      color: #e2e8f0;
+      font-variant-numeric: tabular-nums;
       white-space: nowrap;
     }
 
-    .voice-hint.match {
+    .pitch-chip.match {
       background: rgba(34, 197, 94, 0.25);
       color: #86efac;
-    }
-
-    .voice-hint.low {
-      background: rgba(56, 189, 248, 0.22);
-      color: #bae6fd;
-    }
-
-    .voice-hint.high {
-      background: rgba(251, 146, 60, 0.25);
-      color: #fed7aa;
-    }
-
-    /* Right Pane: 2.5D Game Canvas */
-    .game-pane {
-      position: relative;
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-      background: #14171f;
-    }
-
-    #gameCanvas {
-      display: block;
-      width: 100%;
-      height: 100%;
-    }
-
-    .game-stats-pill {
-      position: absolute;
-      right: 16px;
-      bottom: 18px;
-      z-index: 10;
-      padding: 8px 12px;
-      border-radius: 12px;
-      background: rgba(12, 15, 22, 0.72);
-      backdrop-filter: blur(8px);
-      border: 1px solid rgba(255, 255, 255, 0.14);
-      font-size: 13px;
-      font-weight: 600;
-      color: #e2e8f0;
-      display: flex;
-      gap: 12px;
-      font-variant-numeric: tabular-nums;
     }
 
     /* Modals */
@@ -410,8 +247,9 @@
       align-items: center;
       justify-content: center;
       padding: 20px;
-      background: rgba(6, 8, 13, 0.8);
+      background: rgba(6, 8, 13, 0.78);
       backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
     }
 
     .modal-backdrop.hidden {
@@ -420,8 +258,8 @@
 
     .modal-card {
       width: 100%;
-      max-width: 470px;
-      padding: 28px;
+      max-width: 450px;
+      padding: 26px;
       border-radius: 22px;
       background: linear-gradient(160deg, #1b202c 0%, #11141c 100%);
       border: 1px solid rgba(255, 255, 255, 0.16);
@@ -430,22 +268,22 @@
     }
 
     .modal-emoji {
-      font-size: 46px;
+      font-size: 44px;
       margin-bottom: 10px;
     }
 
     .modal-card h1, .modal-card h2 {
-      font-size: 24px;
+      font-size: 23px;
       font-weight: 800;
       margin-bottom: 10px;
       color: #fff;
     }
 
     .modal-desc {
-      font-size: 14px;
+      font-size: 13.5px;
       line-height: 1.65;
       color: #cbd5e1;
-      margin-bottom: 18px;
+      margin-bottom: 16px;
     }
 
     .modal-rules {
@@ -457,7 +295,7 @@
       font-size: 13px;
       line-height: 1.6;
       color: #e2e8f0;
-      margin-bottom: 20px;
+      margin-bottom: 18px;
     }
 
     .modal-cta {
@@ -490,12 +328,12 @@
     }
 
     .modal-btn-sec {
-      padding: 11px 14px;
+      padding: 10px 12px;
       border-radius: 12px;
       border: 1px solid rgba(255, 255, 255, 0.18);
       background: rgba(255, 255, 255, 0.08);
       color: #f8fafc;
-      font-size: 14px;
+      font-size: 13.5px;
       font-weight: 700;
       cursor: pointer;
     }
@@ -535,7 +373,7 @@
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 10px;
-      margin-bottom: 20px;
+      margin-bottom: 18px;
     }
 
     .win-stat-box {
@@ -557,28 +395,22 @@
       margin-top: 2px;
     }
 
-    @media (max-width: 760px) {
+    @media (max-width: 720px) {
       .top-hud {
-        top: 6px;
+        border-radius: 16px;
         padding: 6px 10px;
-        gap: 6px;
       }
-      .pitch-meter-wrap {
-        left: 12px;
-      }
-      .pitch-bar-track {
+      .volume-capsule {
+        left: 16px;
         width: 18px;
-      }
-      .stage-pill {
-        padding: 3px 6px;
-        font-size: 11px;
+        height: 40vh;
       }
     }
   </style>
 </head>
 <body>
 
-  <!-- Top Control Bar -->
+  <!-- Compact Top Floating HUD -->
   <header class="top-hud">
     <div class="stage-strip" id="stageStrip"></div>
     <div class="hud-divider"></div>
@@ -586,50 +418,29 @@
       <button class="hud-btn" data-midi="48" title="C3–B3 (131–247 Hz)">低音 C3</button>
       <button class="hud-btn active" data-midi="53" title="F3–E4 (175–330 Hz)">通用 F3</button>
       <button class="hud-btn" data-midi="60" title="C4–B4 (262–494 Hz)">標準 C4</button>
-      <button class="hud-btn" id="btnCalibrateDo">🎤 唱一聲定 Do</button>
-      <button class="hud-btn primary-action" id="btnPlayTarget">🔊 聽目標音</button>
+      <button class="hud-btn" id="btnCalibrateDo">🎤 定 Do</button>
+      <button class="hud-btn" id="btnSensitivity">🎙️ 靈敏度: 高</button>
+      <button class="hud-btn primary-action" id="btnPlayTarget">🔊 目標音</button>
       <button class="hud-btn" id="btnReset">↺ 重來</button>
+      <span class="pitch-chip" id="pitchChip">等待聲音</span>
     </div>
   </header>
 
-  <!-- 50% Camera / 50% Game Split -->
-  <main class="split-stage">
-    <!-- Left 50%: Camera & Pitch Gauge -->
-    <section class="camera-pane">
-      <video id="webcam" autoplay playsinline muted></video>
-      <div class="camera-fallback hidden" id="cameraFallback">
-        <div class="mic-orb" id="micOrb">🎤</div>
-        <div style="font-weight: 700; font-size: 16px;">僅麥克風收音模式</div>
-        <div style="font-size: 13px; color: #94a3b8;">未偵測到攝影機或未開啟相機權限，仍可正常聲控遊玩</div>
-      </div>
-      <div class="camera-vignette"></div>
+  <!-- Full-bleed AR Stage: Camera Background + 3D Perspective Overlay -->
+  <main class="ar-stage">
+    <video id="webcam" autoplay playsinline muted></video>
+    <div class="camera-fallback hidden" id="cameraFallback">
+      <div class="mic-orb" id="micOrb">🎤</div>
+      <div style="font-weight: 700; font-size: 15px;">僅麥克風模式</div>
+      <div style="font-size: 12.5px; color: #94a3b8;">未偵測到攝影機，仍可直接聲控遊玩</div>
+    </div>
 
-      <div class="pitch-meter-wrap">
-        <div class="pitch-bar-track">
-          <div class="pitch-target-band" id="pitchTargetBand"></div>
-          <div class="pitch-bar-fill" id="pitchBarFill"></div>
-        </div>
-        <div class="pitch-ticks" id="pitchTicks"></div>
-      </div>
+    <canvas id="gameCanvas"></canvas>
 
-      <div class="voice-readout">
-        <div class="voice-note-main">
-          <span class="voice-note-label" id="voiceNoteLabel">--</span>
-          <span class="voice-hz" id="voiceHzLabel">等待聲音...</span>
-        </div>
-        <span class="voice-hint" id="voiceHint">請發出目標音高</span>
-      </div>
-    </section>
-
-    <!-- Right 50%: 2.5D Canvas Game -->
-    <section class="game-pane">
-      <canvas id="gameCanvas"></canvas>
-      <div class="game-stats-pill">
-        <span id="statStage">關卡: Do (1/7)</span>
-        <span id="statBonks">撞牆: 0</span>
-        <span id="statTime">時間: 0.0s</span>
-      </div>
-    </section>
+    <!-- Left Vertical Volume Capsule (Pure Loudness Display) -->
+    <div class="volume-capsule" aria-label="麥克風音量">
+      <div class="volume-fill" id="volumeFill"></div>
+    </div>
   </main>
 
   <!-- Start Modal -->
@@ -638,12 +449,12 @@
       <div class="modal-emoji">🎤🟠🪵</div>
       <h1>Do Re Mi 聲控闖關</h1>
       <p class="modal-desc">
-        完全純前端單檔運行，音訊與影像都在你的瀏覽器本地處理，不會上傳任何資料。
+        純前端單檔運行，攝影機與麥克風全在瀏覽器本地處理。
       </p>
       <div class="modal-rules">
-        1. 毛球會自動往前衝，靠你的<strong>聲音音高</strong>控制上下飛行高度。<br />
-        2. 沒對準洞口會<strong>撞上木板回退一點</strong>，再繼續往前衝。<br />
-        3. 從 <strong>Do → Re → Mi → Fa → So → La → Si</strong> 一關比一關高，全部穿過即過關！
+        1. 左邊綠黃條顯示你的<strong>聲音大小</strong>。<br />
+        2. 你的<strong>聲音高低</strong>直接控制橘色毛球升降高度。<br />
+        3. 毛球往前撞到木板會回彈一點，唱準 <strong>Do → Re → Mi → Fa → So → La → Si</strong> 即可穿過洞口過關！
       </div>
       <button class="modal-cta" id="btnStartGame">開啟相機與麥克風開始</button>
       <div class="error-box" id="startErrorBox"></div>
@@ -655,7 +466,7 @@
     <div class="modal-card">
       <div class="modal-emoji">🏆🎵✨</div>
       <h2>Do → Si 全部通關！</h2>
-      <p class="modal-desc">你的音準控制完美穿越所有木板洞口！</p>
+      <p class="modal-desc">你的音準完美穿越所有木板洞口！</p>
       <div class="win-stats">
         <div class="win-stat-box">
           <div class="win-stat-val" id="winTimeVal">0.0s</div>
@@ -682,7 +493,7 @@
     'use strict';
 
     // =========================================================================
-    // 1. Core Constants & Unified Pitch-to-Screen Coordinate Math
+    // 1. Core Constants & 3D World Coordinate Math
     // =========================================================================
     const STAGES = [
       { name: 'Do', offset: 0 },
@@ -695,15 +506,21 @@
     ];
 
     const NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
-    const GATE_START_X = 340;
-    const GATE_SPACING = 290;
-    const GATE_THICKNESS = 58;
-    const FORWARD_SPEED = 195;
-    const BOUNCE_SPEED = 245;
-    const ACCEL = 560;
-    const MIDI_BOTTOM_REL = -2.2;
-    const MIDI_TOP_REL = 15.0;
-    const MIDI_SPAN = MIDI_TOP_REL - MIDI_BOTTOM_REL; // 17.2 semitones
+
+    const BALL_RADIUS = 40;
+    const HOLE_RADIUS = 64;
+    const UNITS_PER_SEMITONE = 33;
+    const DO_BASE_Y = 108;
+    const BOARD_TOP_Y = 740;
+    const ROAD_HALF_W = 170;
+    const BOARD_HALF_W = 168;
+    const GATE_START_Z = 220;
+    const GATE_SPACING_Z = 265;
+    const GATE_THICKNESS = 30;
+    const FORWARD_SPEED = 215;
+    const BOUNCE_SPEED = 265;
+    const ACCEL = 620;
+    const PITCH_HOLD_MS = 120;
 
     function clamp(v, min, max) {
       return v < min ? min : (v > max ? max : v);
@@ -724,42 +541,32 @@
       return `${name}${octave}`;
     }
 
-    function computeMetrics(width, height) {
-      const groundY = height * 0.86;
-      const topCeilingY = height * 0.10;
-      const rawSpan = Math.max(120, groundY - topCeilingY);
-      // Fixed-point estimate so ballRadius and pxPerSemitone are self-consistent
-      const px0 = rawSpan / (MIDI_SPAN + 0.68);
-      const ballRadius = clamp(px0 * 0.68, 18, 26);
-      const pxPerSemitone = Math.max(8, (groundY - ballRadius - topCeilingY) / MIDI_SPAN);
-      const holeRadius = ballRadius + pxPerSemitone * 0.72;
+    function midiToWorldY(midi, baseMidi) {
+      const wy = DO_BASE_Y + (midi - baseMidi) * UNITS_PER_SEMITONE;
+      return clamp(wy, BALL_RADIUS, BOARD_TOP_Y - BALL_RADIUS);
+    }
+
+    function project3D(wx, wy, wz, camZ, W, H) {
+      const S = Math.min(W, H) / 720;
+      const F = 340;
+      const dz = Math.max(-F + 25, wz - camZ);
+      const rawScale = F / (dz + F);
+      const vpX = W * 0.96;
+      const vpY = H * 0.50;
+      const originX = W * 0.42;
+      const originY = H * 1.05;
       return {
-        width,
-        height,
-        groundY,
-        topCeilingY,
-        ballRadius,
-        pxPerSemitone,
-        holeRadius,
-        boardWidth: clamp(width * 0.24, 118, 178),
+        x: vpX + (originX + wx * S - vpX) * rawScale,
+        y: vpY + (originY - wy * S - vpY) * rawScale,
+        scale: rawScale * S,
+        rawScale,
       };
     }
 
-    function midiNorm(midi, baseMidi) {
-      return (midi - (baseMidi + MIDI_BOTTOM_REL)) / MIDI_SPAN;
-    }
-
-    function midiToY(midi, baseMidi, metrics) {
-      const minY = metrics.topCeilingY;
-      const maxY = metrics.groundY - metrics.ballRadius;
-      const t = midiNorm(midi, baseMidi);
-      return clamp(maxY - t * (maxY - minY), metrics.ballRadius + 6, maxY);
-    }
-
     // =========================================================================
-    // 2. Time-Domain YIN Pitch Detector (Pure Function)
+    // 2. Time-Domain YIN Pitch Detector (High Sensitivity, Periodicity-Gated)
     // =========================================================================
-    function detectPitchYIN(buf, sampleRate, rmsGate = 0.012) {
+    function detectPitchYIN(buf, sampleRate, rmsGate = 0.0035) {
       const n = buf.length;
       if (!n || !sampleRate) return { freq: null, rms: 0 };
 
@@ -793,7 +600,7 @@
 
       let tauEstimate = -1;
       for (let tau = tauMin; tau <= tauMax; tau++) {
-        if (cmndf[tau] < 0.15) {
+        if (cmndf[tau] < 0.16) {
           while (tau + 1 <= tauMax && cmndf[tau + 1] < cmndf[tau]) {
             tau++;
           }
@@ -802,7 +609,6 @@
         }
       }
 
-      // Fallback to global minimum only if reasonably periodic
       if (tauEstimate === -1) {
         let minVal = Infinity;
         let minTau = -1;
@@ -812,13 +618,12 @@
             minTau = tau;
           }
         }
-        if (minVal >= 0.28 || minTau === -1) {
+        if (minVal >= 0.24 || minTau === -1) {
           return { freq: null, rms };
         }
         tauEstimate = minTau;
       }
 
-      // 3-point parabolic interpolation for sub-sample precision
       let betterTau = tauEstimate;
       if (tauEstimate > 1 && tauEstimate < tauMax) {
         const s0 = cmndf[tauEstimate - 1];
@@ -841,74 +646,71 @@
     }
 
     // =========================================================================
-    // 3. Game State & Kinematics (Pure Physics Step)
+    // 3. 3D Game State & Pure Physics Step
     // =========================================================================
-    function createGates(baseMidi, metrics) {
+    function createGates(baseMidi) {
       return STAGES.map((stage, i) => ({
         index: i,
         name: stage.name,
         targetMidi: baseMidi + stage.offset,
-        x: GATE_START_X + i * GATE_SPACING,
-        holeY: midiToY(baseMidi + stage.offset, baseMidi, metrics),
-        holeRadius: metrics.holeRadius,
+        z: GATE_START_Z + i * GATE_SPACING_Z,
+        holeY: DO_BASE_Y + stage.offset * UNITS_PER_SEMITONE,
+        holeRadius: HOLE_RADIUS,
         shake: 0,
         passed: false,
       }));
     }
 
     function recomputeGates(state) {
-      const m = state.metrics;
-      state.ball.radius = m.ballRadius;
-      state.ball.y = clamp(state.ball.y, m.ballRadius + 6, m.groundY - m.ballRadius);
       for (let i = 0; i < STAGES.length; i++) {
-        const g = state.gates[i];
-        g.targetMidi = state.baseMidi + STAGES[i].offset;
-        g.holeY = midiToY(g.targetMidi, state.baseMidi, m);
-        g.holeRadius = m.holeRadius;
+        state.gates[i].targetMidi = state.baseMidi + STAGES[i].offset;
+        state.gates[i].holeY = DO_BASE_Y + STAGES[i].offset * UNITS_PER_SEMITONE;
+        state.gates[i].holeRadius = HOLE_RADIUS;
       }
     }
 
-    function createGameState(baseMidi = 53, width = 640, height = 720) {
-      const metrics = computeMetrics(width, height);
-      const gates = createGates(baseMidi, metrics);
+    function createGameState(baseMidi = 53) {
       return {
         baseMidi,
-        metrics,
-        gates,
+        gates: createGates(baseMidi),
         stage: 0,
         bonks: 0,
         elapsed: 0,
         won: false,
         started: false,
-        camX: 0,
+        camZ: 0,
         smoothedMidi: null,
         lastFreq: null,
         lastRms: 0,
+        volumeLevel: 0,
         particles: [],
         ball: {
-          x: 90,
-          y: metrics.groundY - metrics.ballRadius,
-          vx: FORWARD_SPEED * 0.5,
-          radius: metrics.ballRadius,
+          x: 0,
+          y: BALL_RADIUS,
+          z: 60,
+          vz: FORWARD_SPEED * 0.5,
+          radius: BALL_RADIUS,
           squash: 0,
           rot: 0,
         },
       };
     }
 
-    function spawnParticles(state, x, y, color, count) {
+    function spawnParticles(state, x, y, z, color, count) {
       if (!state.particles) return;
       for (let i = 0; i < count; i++) {
-        const angle = Math.random() * Math.PI * 2;
-        const speed = 60 + Math.random() * 190;
+        const ang = Math.random() * Math.PI * 2;
+        const spd = 70 + Math.random() * 190;
         state.particles.push({
           x,
           y,
-          vx: Math.cos(angle) * speed,
-          vy: Math.sin(angle) * speed - 40,
-          life: 0.45 + Math.random() * 0.35,
+          z,
+          vx: Math.cos(ang) * spd,
+          vy: Math.sin(ang) * spd + 60,
+          vz: (Math.random() - 0.5) * 90,
+          life: 0.4 + Math.random() * 0.35,
           maxLife: 0.75,
-          size: 3 + Math.random() * 4.5,
+          size: 4 + Math.random() * 5,
           color,
         });
       }
@@ -916,20 +718,19 @@
 
     function stepPhysics(state, rawDt) {
       const dt = Math.min(Math.max(rawDt, 0), 0.05);
-      const m = state.metrics;
       const ball = state.ball;
 
-      // Decay visual springs & particles even after winning
       ball.squash = Math.max(0, ball.squash - dt * 5.2);
       for (let i = 0; i < state.gates.length; i++) {
-        state.gates[i].shake = Math.max(0, state.gates[i].shake - dt * 4.8);
+        state.gates[i].shake = Math.max(0, state.gates[i].shake - dt * 5.0);
       }
       if (state.particles) {
         for (let i = state.particles.length - 1; i >= 0; i--) {
           const p = state.particles[i];
           p.x += p.vx * dt;
           p.y += p.vy * dt;
-          p.vy += 380 * dt;
+          p.z += p.vz * dt;
+          p.vy -= 420 * dt;
           p.life -= dt;
           if (p.life <= 0) state.particles.splice(i, 1);
         }
@@ -939,52 +740,48 @@
 
       state.elapsed += dt;
 
-      // 1. Vertical pitch tracking
+      // 1. Voice pitch directly controls the orange ball's vertical world height
       if (state.smoothedMidi !== null) {
-        const targetY = midiToY(state.smoothedMidi, state.baseMidi, m);
-        ball.y += (targetY - ball.y) * (1 - Math.exp(-14 * dt));
+        const targetY = midiToWorldY(state.smoothedMidi, state.baseMidi);
+        ball.y += (targetY - ball.y) * (1 - Math.exp(-15 * dt));
       } else {
-        const restY = m.groundY - ball.radius;
-        ball.y += (restY - ball.y) * (1 - Math.exp(-5 * dt));
+        ball.y += (BALL_RADIUS - ball.y) * (1 - Math.exp(-6 * dt));
       }
 
-      // 2. Horizontal motion & active gate collision
-      const prevX = ball.x;
-      ball.vx = Math.min(FORWARD_SPEED, ball.vx + ACCEL * dt);
-      ball.x += ball.vx * dt;
-      ball.rot += (ball.vx * dt) / Math.max(10, ball.radius);
+      // 2. Forward Z motion & active gate collision
+      const prevZ = ball.z;
+      ball.vz = Math.min(FORWARD_SPEED, ball.vz + ACCEL * dt);
+      ball.z += ball.vz * dt;
+      ball.rot += (ball.vz * dt) / BALL_RADIUS;
 
       const g = state.gates[state.stage];
       if (g) {
-        const frontX = g.x - GATE_THICKNESS / 2;
-        const backX = g.x + GATE_THICKNESS / 2;
-        const clearance = g.holeRadius - ball.radius;
+        const frontZ = g.z - GATE_THICKNESS / 2;
+        const backZ = g.z + GATE_THICKNESS / 2;
+        const clearance = g.holeRadius - BALL_RADIUS;
         const inHole = Math.abs(ball.y - g.holeY) <= clearance;
 
-        // Crossing the front plank plane
-        if (prevX + ball.radius <= frontX && ball.x + ball.radius > frontX) {
+        if (prevZ + BALL_RADIUS <= frontZ && ball.z + BALL_RADIUS > frontZ) {
           if (!inHole) {
-            ball.x = frontX - ball.radius - 0.5;
-            ball.vx = -BOUNCE_SPEED;
+            ball.z = frontZ - BALL_RADIUS - 0.5;
+            ball.vz = -BOUNCE_SPEED;
             state.bonks++;
             g.shake = 1;
             ball.squash = 1;
-            spawnParticles(state, frontX, ball.y, '#fbbf24', 10);
-            spawnParticles(state, frontX, ball.y, '#d97706', 6);
+            spawnParticles(state, ball.x, ball.y, frontZ, '#fb923c', 10);
+            spawnParticles(state, ball.x, ball.y, frontZ, '#fde047', 6);
           }
         }
 
-        // Inside the circular tunnel thickness: guide smoothly through
-        if (ball.x + ball.radius > frontX && ball.x - ball.radius < backX) {
-          ball.vx = Math.max(ball.vx, FORWARD_SPEED);
+        if (ball.z + BALL_RADIUS > frontZ && ball.z - BALL_RADIUS < backZ) {
+          ball.vz = Math.max(ball.vz, FORWARD_SPEED);
           ball.y = clamp(ball.y, g.holeY - clearance, g.holeY + clearance);
         }
 
-        // Cleared back plane -> advance stage
-        if (ball.x - ball.radius >= backX) {
+        if (ball.z - BALL_RADIUS >= backZ) {
           g.passed = true;
-          spawnParticles(state, backX, g.holeY, '#4ade80', 16);
-          spawnParticles(state, backX, g.holeY, '#fde047', 12);
+          spawnParticles(state, 0, g.holeY, backZ, '#4ade80', 16);
+          spawnParticles(state, 0, g.holeY, backZ, '#fde047', 10);
           state.stage++;
           if (state.stage >= STAGES.length) {
             state.won = true;
@@ -992,13 +789,13 @@
         }
       }
 
-      // 3. Smooth camera tracking
-      const desiredCamX = Math.max(0, ball.x - m.width * 0.25);
-      state.camX += (desiredCamX - state.camX) * (1 - Math.exp(-8 * dt));
+      // 3. Smooth 3D camera follows ball along Z
+      const desiredCamZ = Math.max(0, ball.z - 150);
+      state.camZ += (desiredCamZ - state.camZ) * (1 - Math.exp(-8 * dt));
     }
 
     // =========================================================================
-    // 4. Browser Runtime (Audio, Camera, Canvas Rendering, UI)
+    // 4. Browser Runtime (Textures, Mic Pre-Amp, AR Camera, 3D Renderer)
     // =========================================================================
     if (typeof window !== 'undefined' && typeof document !== 'undefined') {
       const canvas = document.getElementById('gameCanvas');
@@ -1008,16 +805,8 @@
       const micOrb = document.getElementById('micOrb');
 
       const stageStrip = document.getElementById('stageStrip');
-      const pitchBarFill = document.getElementById('pitchBarFill');
-      const pitchTargetBand = document.getElementById('pitchTargetBand');
-      const pitchTicks = document.getElementById('pitchTicks');
-      const voiceNoteLabel = document.getElementById('voiceNoteLabel');
-      const voiceHzLabel = document.getElementById('voiceHzLabel');
-      const voiceHint = document.getElementById('voiceHint');
-
-      const statStage = document.getElementById('statStage');
-      const statBonks = document.getElementById('statBonks');
-      const statTime = document.getElementById('statTime');
+      const volumeFill = document.getElementById('volumeFill');
+      const pitchChip = document.getElementById('pitchChip');
 
       const startModal = document.getElementById('startModal');
       const startErrorBox = document.getElementById('startErrorBox');
@@ -1028,6 +817,7 @@
 
       const btnStartGame = document.getElementById('btnStartGame');
       const btnCalibrateDo = document.getElementById('btnCalibrateDo');
+      const btnSensitivity = document.getElementById('btnSensitivity');
       const btnPlayTarget = document.getElementById('btnPlayTarget');
       const btnReset = document.getElementById('btnReset');
       const btnReplaySame = document.getElementById('btnReplaySame');
@@ -1035,22 +825,144 @@
       const btnCloseWin = document.getElementById('btnCloseWin');
       const presetButtons = Array.from(document.querySelectorAll('#presetGroup [data-midi]'));
 
-      const state = createGameState(53, canvas.clientWidth || 640, canvas.clientHeight || 720);
+      const GAIN_MODES = [
+        { label: '高', gain: 3.2 },
+        { label: '超高', gain: 6.0 },
+        { label: '標準', gain: 1.6 },
+      ];
+      let gainIdx = 0;
+
+      const state = createGameState(53);
+      let viewW = window.innerWidth;
+      let viewH = window.innerHeight;
+      let usingFallbackBg = false;
 
       let audioCtx = null;
+      let preAmpGain = null;
       let analyser = null;
       let timeDomainBuf = null;
       let mutePitchUntil = 0;
+      let lastValidPitchTime = 0;
       const medianBuf = [];
       let lastFrameTime = performance.now();
       let winShown = false;
 
-      // Calibration state
       let calibrating = false;
       let calSamples = [];
       let calStartAt = 0;
 
-      // Build UI stage pills & pitch bar ticks
+      // -----------------------------------------------------------------------
+      // Offscreen Procedural Oak Wood & Fluffy Pom-Pom Textures
+      // -----------------------------------------------------------------------
+      function createWoodCanvas() {
+        const c = document.createElement('canvas');
+        c.width = 160;
+        c.height = 320;
+        const g = c.getContext('2d');
+
+        const base = g.createLinearGradient(0, 0, c.width, 0);
+        base.addColorStop(0, '#d8a472');
+        base.addColorStop(0.45, '#c78f5c');
+        base.addColorStop(0.75, '#ce9662');
+        base.addColorStop(1, '#b67d4a');
+        g.fillStyle = base;
+        g.fillRect(0, 0, c.width, c.height);
+
+        // Vertical wood fibers & wavy cathedral grain
+        for (let i = 0; i < 42; i++) {
+          const x = (i / 42) * c.width;
+          g.strokeStyle = i % 3 === 0 ? 'rgba(115, 62, 22, 0.22)' : 'rgba(255, 226, 188, 0.14)';
+          g.lineWidth = 1 + (i % 3) * 0.7;
+          g.beginPath();
+          g.moveTo(x, 0);
+          for (let y = 0; y <= c.height; y += 20) {
+            const wave = Math.sin(y * 0.025 + i * 0.65) * 3.5 + Math.cos(y * 0.011 + i) * 2.2;
+            g.lineTo(x + wave, y);
+          }
+          g.stroke();
+        }
+
+        // Subtle elliptical grain knots
+        g.strokeStyle = 'rgba(110, 58, 18, 0.18)';
+        g.lineWidth = 1.6;
+        for (let k = 0; k < 3; k++) {
+          const kx = 32 + k * 46;
+          const ky = 65 + k * 88;
+          for (let r = 1; r <= 4; r++) {
+            g.beginPath();
+            g.ellipse(kx, ky, r * 4.5, r * 22, 0.04, 0, Math.PI * 2);
+            g.stroke();
+          }
+        }
+        return c;
+      }
+
+      function createPomPomCanvas() {
+        const c = document.createElement('canvas');
+        const size = 220;
+        c.width = size;
+        c.height = size;
+        const g = c.getContext('2d');
+        const cx = size / 2;
+        const cy = size / 2;
+        const r = 74;
+
+        // Warm core
+        const core = g.createRadialGradient(cx - 18, cy - 22, 10, cx, cy, r + 6);
+        core.addColorStop(0, '#fdba74');
+        core.addColorStop(0.55, '#f97316');
+        core.addColorStop(1, '#c2410c');
+        g.fillStyle = core;
+        g.beginPath();
+        g.arc(cx, cy, r, 0, Math.PI * 2);
+        g.fill();
+
+        // Dense radial multi-layered fluffy fur fibers (no cartoon eyes)
+        const colors = ['#ffedd5', '#fdba74', '#fb923c', '#f97316', '#ea580c', '#c2410c'];
+        g.lineCap = 'round';
+
+        // Inner body tuft texture
+        for (let i = 0; i < 220; i++) {
+          const ang = (i * 2.39996) % (Math.PI * 2);
+          const dist = Math.sqrt((i + 1) / 220) * (r * 0.88);
+          const bx = cx + Math.cos(ang) * dist;
+          const by = cy + Math.sin(ang) * dist;
+          const outAng = ang + Math.sin(i * 1.7) * 0.45;
+          const len = 10 + (i % 7) * 2.1;
+          g.strokeStyle = colors[(i + (dist < r * 0.5 ? 0 : 2)) % colors.length];
+          g.lineWidth = 2.0;
+          g.globalAlpha = 0.72;
+          g.beginPath();
+          g.moveTo(bx, by);
+          g.lineTo(bx + Math.cos(outAng) * len, by + Math.sin(outAng) * len);
+          g.stroke();
+        }
+
+        // Outer fluffy fringe hairs
+        for (let i = 0; i < 280; i++) {
+          const ang = (i / 280) * Math.PI * 2 + Math.sin(i * 5.3) * 0.03;
+          const innerR = r * (0.70 + (i % 5) * 0.05);
+          const outerR = r + 7 + (i % 9) * 2.1;
+          const curve = Math.cos(i * 3.1) * 0.14;
+          const topLight = Math.sin(ang) < 0 ? 0 : 2;
+          g.strokeStyle = colors[(i % 4) + topLight];
+          g.lineWidth = 1.6 + (i % 3) * 0.55;
+          g.globalAlpha = 0.82;
+          g.beginPath();
+          g.moveTo(cx + Math.cos(ang) * innerR, cy + Math.sin(ang) * innerR);
+          g.lineTo(cx + Math.cos(ang + curve) * outerR, cy + Math.sin(ang + curve) * outerR);
+          g.stroke();
+        }
+        g.globalAlpha = 1;
+        return c;
+      }
+
+      const woodTex = createWoodCanvas();
+      const pomPomTex = createPomPomCanvas();
+
+      // -----------------------------------------------------------------------
+      // HUD & State Management
+      // -----------------------------------------------------------------------
       function buildStageStrip() {
         stageStrip.innerHTML = '';
         STAGES.forEach((s, i) => {
@@ -1062,51 +974,15 @@
         });
       }
 
-      function buildPitchTicks() {
-        pitchTicks.innerHTML = '';
-        STAGES.forEach((s, i) => {
-          const midi = state.baseMidi + s.offset;
-          const pct = clamp(midiNorm(midi, state.baseMidi) * 100, 2, 98);
-          const tick = document.createElement('div');
-          tick.className = 'pitch-tick';
-          tick.dataset.idx = String(i);
-          tick.style.bottom = `${pct}%`;
-          tick.textContent = `${s.name}`;
-          pitchTicks.appendChild(tick);
-        });
-      }
-
       function updateHudIndicators() {
         const pills = stageStrip.children;
-        const ticks = pitchTicks.children;
         for (let i = 0; i < STAGES.length; i++) {
           const done = i < state.stage;
           const active = i === state.stage && !state.won;
           if (pills[i]) {
             pills[i].className = 'stage-pill' + (done ? ' done' : active ? ' active' : '');
           }
-          if (ticks[i]) {
-            ticks[i].className = 'pitch-tick' + (active ? ' target' : '');
-          }
         }
-
-        // Update target tolerance band on the vertical pitch capsule
-        if (state.stage < STAGES.length) {
-          const g = state.gates[state.stage];
-          const semitoneTol = (g.holeRadius - state.ball.radius) / state.metrics.pxPerSemitone;
-          const bottomPct = clamp(midiNorm(g.targetMidi - semitoneTol, state.baseMidi) * 100, 0, 100);
-          const topPct = clamp(midiNorm(g.targetMidi + semitoneTol, state.baseMidi) * 100, 0, 100);
-          pitchTargetBand.style.display = 'block';
-          pitchTargetBand.style.bottom = `${bottomPct}%`;
-          pitchTargetBand.style.height = `${Math.max(3, topPct - bottomPct)}%`;
-          statStage.textContent = `關卡: ${g.name} (${state.stage + 1}/7)`;
-        } else {
-          pitchTargetBand.style.display = 'none';
-          statStage.textContent = '關卡: 全部通關!';
-        }
-
-        statBonks.textContent = `撞牆: ${state.bonks}`;
-        statTime.textContent = `時間: ${state.elapsed.toFixed(1)}s`;
       }
 
       function setBaseMidi(newBaseMidi) {
@@ -1115,25 +991,23 @@
         presetButtons.forEach((btn) => {
           btn.classList.toggle('active', Number(btn.dataset.midi) === state.baseMidi);
         });
-        buildPitchTicks();
-        updateHudIndicators();
       }
 
       function resetGame(newBaseMidi) {
         if (typeof newBaseMidi === 'number') {
           state.baseMidi = clamp(Math.round(newBaseMidi), 43, 66);
         }
-        const m = state.metrics;
-        state.gates = createGates(state.baseMidi, m);
+        state.gates = createGates(state.baseMidi);
         state.stage = 0;
         state.bonks = 0;
         state.elapsed = 0;
         state.won = false;
-        state.camX = 0;
+        state.camZ = 0;
         state.particles = [];
-        state.ball.x = 90;
-        state.ball.y = m.groundY - m.ballRadius;
-        state.ball.vx = FORWARD_SPEED * 0.5;
+        state.ball.x = 0;
+        state.ball.y = BALL_RADIUS;
+        state.ball.z = 60;
+        state.ball.vz = FORWARD_SPEED * 0.5;
         state.ball.squash = 0;
         state.ball.rot = 0;
         winShown = false;
@@ -1141,32 +1015,26 @@
         presetButtons.forEach((btn) => {
           btn.classList.toggle('active', Number(btn.dataset.midi) === state.baseMidi);
         });
-        buildPitchTicks();
         updateHudIndicators();
       }
 
       function resizeCanvas() {
-        const rect = canvas.parentElement.getBoundingClientRect();
         const dpr = Math.min(window.devicePixelRatio || 1, 2);
-        const w = Math.max(320, Math.floor(rect.width));
-        const h = Math.max(320, Math.floor(rect.height));
-        canvas.width = w * dpr;
-        canvas.height = h * dpr;
+        viewW = Math.max(320, window.innerWidth);
+        viewH = Math.max(320, window.innerHeight);
+        canvas.width = viewW * dpr;
+        canvas.height = viewH * dpr;
         ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-        state.metrics = computeMetrics(w, h);
-        recomputeGates(state);
-        buildPitchTicks();
-        updateHudIndicators();
       }
 
-      // =======================================================================
-      // 5. WebRTC & Web Audio Initialization
-      // =======================================================================
+      // -----------------------------------------------------------------------
+      // WebRTC & Web Audio (Pre-amp Boost + Noise Suppression Off)
+      // -----------------------------------------------------------------------
       async function startMedia() {
         startErrorBox.classList.remove('visible');
         if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
           showMediaError(
-            '此瀏覽器環境無法存取麥克風/攝影機 API（常見於直接以 file:// 開啟 Safari 或非安全來源）。',
+            '此瀏覽器環境無法存取麥克風/攝影機 API（常見於直接以 file:// 開啟 Safari）。',
             true
           );
           return;
@@ -1175,7 +1043,7 @@
         const audioConstraints = {
           echoCancellation: false,
           noiseSuppression: false,
-          autoGainControl: false,
+          autoGainControl: true,
         };
 
         let stream = null;
@@ -1188,11 +1056,9 @@
           });
           hasVideo = stream.getVideoTracks().length > 0;
         } catch (_errVideo) {
-          // Fallback 1: Audio-only without strict video
           try {
             stream = await navigator.mediaDevices.getUserMedia({ audio: audioConstraints });
           } catch (_errStrictAudio) {
-            // Fallback 2: Basic audio
             try {
               stream = await navigator.mediaDevices.getUserMedia({ audio: true });
             } catch (errFinal) {
@@ -1202,17 +1068,16 @@
           }
         }
 
-        // Prevent speaker feedback loops
         videoEl.muted = true;
         if (hasVideo) {
+          usingFallbackBg = false;
           videoEl.srcObject = stream;
           cameraFallback.classList.add('hidden');
           try {
             await videoEl.play();
-          } catch (_e) {
-            // autoplay handles playback
-          }
+          } catch (_e) {}
         } else {
+          usingFallbackBg = true;
           videoEl.style.display = 'none';
           cameraFallback.classList.remove('hidden');
         }
@@ -1225,11 +1090,17 @@
           await audioCtx.resume();
         }
 
+        // Route: mic source -> preAmpGain -> analyser (NEVER connected to destination)
         const source = audioCtx.createMediaStreamSource(stream);
+        preAmpGain = audioCtx.createGain();
+        preAmpGain.gain.value = GAIN_MODES[gainIdx].gain;
+
         analyser = audioCtx.createAnalyser();
         analyser.fftSize = 4096;
         analyser.smoothingTimeConstant = 0;
-        source.connect(analyser);
+
+        source.connect(preAmpGain);
+        preAmpGain.connect(analyser);
         timeDomainBuf = new Float32Array(analyser.fftSize);
 
         state.started = true;
@@ -1241,7 +1112,7 @@
         startErrorBox.innerHTML =
           `<strong>啟動失敗：</strong>${msg}` +
           (showServerTip
-            ? '<br/>建議：請允許瀏覽器麥克風權限；若使用 Safari 且直接雙擊開啟檔案受限，請在終端機於此資料夾執行：<code>python3 -m http.server 8000</code> 後開啟 <code>http://localhost:8000</code>。'
+            ? '<br/>建議：請允許瀏覽器麥克風權限；若使用 Safari 直接開啟本地檔案受限，請在終端機執行：<code>python3 -m http.server 8000</code> 後開啟 <code>http://localhost:8000</code>。'
             : '');
         startErrorBox.classList.add('visible');
       }
@@ -1275,13 +1146,22 @@
         osc.stop(now + 0.3);
       }
 
+      function cycleSensitivity() {
+        gainIdx = (gainIdx + 1) % GAIN_MODES.length;
+        const mode = GAIN_MODES[gainIdx];
+        btnSensitivity.textContent = `🎙️ 靈敏度: ${mode.label}`;
+        if (preAmpGain && audioCtx) {
+          preAmpGain.gain.setValueAtTime(mode.gain, audioCtx.currentTime);
+        }
+      }
+
       function startCalibration() {
         if (!state.started) return;
         calibrating = true;
         calSamples = [];
         calStartAt = performance.now();
         btnCalibrateDo.classList.add('calibrating');
-        btnCalibrateDo.textContent = '🎤 請唱出 Do...';
+        btnCalibrateDo.textContent = '🎤 唱 Do...';
       }
 
       function finishCalibration(detectedMidi) {
@@ -1291,35 +1171,44 @@
           setBaseMidi(detectedMidi);
           btnCalibrateDo.textContent = `✓ Do=${midiToNoteLabel(state.baseMidi)}`;
           setTimeout(() => {
-            if (!calibrating) btnCalibrateDo.textContent = '🎤 唱一聲定 Do';
+            if (!calibrating) btnCalibrateDo.textContent = '🎤 定 Do';
           }, 2200);
         } else {
-          btnCalibrateDo.textContent = '🎤 唱一聲定 Do';
+          btnCalibrateDo.textContent = '🎤 定 Do';
         }
       }
 
-      // =======================================================================
-      // 6. Audio Sampling & Left-Pane HUD Update
-      // =======================================================================
+      // -----------------------------------------------------------------------
+      // Audio Sampling: Loudness -> Left Volume Bar, Pitch -> Ball Height
+      // -----------------------------------------------------------------------
       function updateAudio(dt) {
         if (!analyser || !timeDomainBuf) return;
 
-        if (performance.now() < mutePitchUntil) {
+        const nowMs = performance.now();
+        if (nowMs < mutePitchUntil) {
           state.smoothedMidi = null;
           return;
         }
 
         analyser.getFloatTimeDomainData(timeDomainBuf);
-        const { freq, rms } = detectPitchYIN(timeDomainBuf, audioCtx.sampleRate, 0.012);
+        const { freq, rms } = detectPitchYIN(timeDomainBuf, audioCtx.sampleRate, 0.0035);
         state.lastRms = rms;
 
-        // Animate mic orb in fallback mode
-        if (!cameraFallback.classList.contains('hidden')) {
-          const scale = 1 + clamp(rms * 4.5, 0, 0.35);
-          micOrb.style.transform = `scale(${scale.toFixed(3)})`;
+        // 1. Logarithmic dB loudness meter for Left Volume Bar ([-52 dB, -8 dB])
+        const db = 20 * Math.log10(Math.max(rms, 1e-5));
+        const targetVol = clamp((db + 52) / 44, 0, 1);
+        const volRate = targetVol > state.volumeLevel ? 24 : 8;
+        state.volumeLevel += (targetVol - state.volumeLevel) * (1 - Math.exp(-volRate * dt));
+        volumeFill.style.height = `${(state.volumeLevel * 100).toFixed(1)}%`;
+
+        if (usingFallbackBg) {
+          const orbScale = 1 + state.volumeLevel * 0.32;
+          micOrb.style.transform = `scale(${orbScale.toFixed(3)})`;
         }
 
+        // 2. Pitch tracking with 120ms grace hold
         if (freq !== null) {
+          lastValidPitchTime = nowMs;
           const rawMidi = freqToMidi(freq);
           medianBuf.push(rawMidi);
           if (medianBuf.length > 3) medianBuf.shift();
@@ -1335,347 +1224,336 @@
 
           if (calibrating) {
             calSamples.push(medMidi);
-            if (calSamples.length >= 16 && performance.now() - calStartAt >= 450) {
+            if (calSamples.length >= 16 && nowMs - calStartAt >= 450) {
               const midSorted = calSamples.slice().sort((a, b) => a - b);
               finishCalibration(midSorted[Math.floor(midSorted.length / 2)]);
             }
           }
         } else {
-          medianBuf.length = 0;
-          state.smoothedMidi = null;
-          state.lastFreq = null;
-          if (calibrating && performance.now() - calStartAt > 4000) {
+          if (nowMs - lastValidPitchTime > PITCH_HOLD_MS) {
+            medianBuf.length = 0;
+            state.smoothedMidi = null;
+            state.lastFreq = null;
+          }
+          if (calibrating && nowMs - calStartAt > 4000) {
             finishCalibration(null);
           }
         }
 
-        // Update Left Pitch Bar & Voice Badge
-        if (state.smoothedMidi !== null && state.lastFreq !== null) {
-          const pct = clamp(midiNorm(state.smoothedMidi, state.baseMidi) * 100, 2, 100);
-          pitchBarFill.style.height = `${pct.toFixed(1)}%`;
-          voiceNoteLabel.textContent = midiToNoteLabel(state.smoothedMidi);
-          voiceHzLabel.textContent = `${state.lastFreq.toFixed(1)} Hz`;
-
-          if (state.stage < STAGES.length) {
-            const g = state.gates[state.stage];
+        // Update compact pitch status chip in top pill
+        if (state.stage < STAGES.length) {
+          const g = state.gates[state.stage];
+          if (state.smoothedMidi !== null) {
             const diff = state.smoothedMidi - g.targetMidi;
-            const tol = (g.holeRadius - state.ball.radius) / state.metrics.pxPerSemitone;
+            const tol = (g.holeRadius - BALL_RADIUS) / UNITS_PER_SEMITONE;
+            const noteStr = midiToNoteLabel(state.smoothedMidi);
             if (Math.abs(diff) <= tol) {
-              voiceHint.textContent = `準確！穿過 ${g.name}`;
-              voiceHint.className = 'voice-hint match';
+              pitchChip.textContent = `${noteStr} ✓ 穿過 ${g.name}`;
+              pitchChip.className = 'pitch-chip match';
             } else if (diff < 0) {
-              voiceHint.textContent = `↑ 偏低 (${g.name})`;
-              voiceHint.className = 'voice-hint low';
+              pitchChip.textContent = `${noteStr} ↑ 唱高一點 (${g.name})`;
+              pitchChip.className = 'pitch-chip';
             } else {
-              voiceHint.textContent = `↓ 偏高 (${g.name})`;
-              voiceHint.className = 'voice-hint high';
+              pitchChip.textContent = `${noteStr} ↓ 唱低一點 (${g.name})`;
+              pitchChip.className = 'pitch-chip';
             }
+          } else {
+            pitchChip.textContent = `目標: ${g.name} (${midiToNoteLabel(g.targetMidi)})`;
+            pitchChip.className = 'pitch-chip';
           }
         } else {
-          pitchBarFill.style.height = '0%';
-          voiceNoteLabel.textContent = '--';
-          voiceHzLabel.textContent = '請發聲';
-          voiceHint.textContent = state.stage < STAGES.length ? `目標：${STAGES[state.stage].name}` : '已通關';
-          voiceHint.className = 'voice-hint';
+          pitchChip.textContent = '全部通關!';
+          pitchChip.className = 'pitch-chip match';
         }
       }
 
-      // =======================================================================
-      // 7. 2.5D Canvas Rendering (Perspective Road, Wood Boards, Fluffy Ball)
-      // =======================================================================
-      function drawBackgroundAndRoad(m, camX) {
-        const { width, height, groundY } = m;
-
-        // Dark studio backdrop + soft spotlight
-        const bgGrad = ctx.createLinearGradient(0, 0, 0, groundY);
-        bgGrad.addColorStop(0, '#0f1218');
-        bgGrad.addColorStop(1, '#1d222d');
-        ctx.fillStyle = bgGrad;
-        ctx.fillRect(0, 0, width, groundY);
-
-        const spot = ctx.createRadialGradient(width * 0.72, height * 0.08, 12, width * 0.72, height * 0.14, width * 0.65);
-        spot.addColorStop(0, 'rgba(255, 250, 235, 0.55)');
-        spot.addColorStop(0.25, 'rgba(255, 240, 210, 0.14)');
-        spot.addColorStop(1, 'rgba(255, 240, 210, 0)');
-        ctx.fillStyle = spot;
-        ctx.fillRect(0, 0, width, groundY);
-
-        // Perspective tiled curb strip along the road edge
-        const curbTop = groundY - 12;
-        const curbBot = groundY + 10;
-        ctx.fillStyle = '#e2e8f0';
-        ctx.fillRect(0, curbTop, width, curbBot - curbTop);
-
-        const tileW = 34;
-        const startTile = Math.floor(camX / tileW) - 1;
-        const numTiles = Math.ceil(width / tileW) + 3;
-        ctx.strokeStyle = 'rgba(100, 116, 139, 0.45)';
-        ctx.lineWidth = 1.5;
-        for (let i = startTile; i < startTile + numTiles; i++) {
-          const sx = i * tileW - camX;
-          ctx.beginPath();
-          ctx.moveTo(sx + 8, curbTop);
-          ctx.lineTo(sx - 6, curbBot);
-          ctx.stroke();
-        }
-
-        // Brown bevel rim under curb
-        ctx.fillStyle = '#8b6f5c';
-        ctx.fillRect(0, curbBot, width, 5);
-
-        // Asphalt road below curb
-        const roadTop = curbBot + 5;
-        const roadGrad = ctx.createLinearGradient(0, roadTop, 0, height);
-        roadGrad.addColorStop(0, '#4b515c');
-        roadGrad.addColorStop(1, '#20242c');
-        ctx.fillStyle = roadGrad;
-        ctx.fillRect(0, roadTop, width, height - roadTop);
-
-        // Dashed white center road stripes
-        const dashCycle = 96;
-        const dashOffset = -(camX % dashCycle);
-        const midRoadY = roadTop + (height - roadTop) * 0.48;
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.72)';
-        for (let x = dashOffset - dashCycle; x < width + dashCycle; x += dashCycle) {
-          ctx.beginPath();
-          ctx.moveTo(x + 12, midRoadY - 3);
-          ctx.lineTo(x + 58, midRoadY - 3);
-          ctx.lineTo(x + 50, midRoadY + 4);
-          ctx.lineTo(x + 4, midRoadY + 4);
-          ctx.closePath();
+      // -----------------------------------------------------------------------
+      // 3D Perspective Drawing Helpers
+      // -----------------------------------------------------------------------
+      function fillQuad(p0, p1, p2, p3, fillStyle, strokeStyle) {
+        ctx.beginPath();
+        ctx.moveTo(p0.x, p0.y);
+        ctx.lineTo(p1.x, p1.y);
+        ctx.lineTo(p2.x, p2.y);
+        ctx.lineTo(p3.x, p3.y);
+        ctx.closePath();
+        if (fillStyle) {
+          ctx.fillStyle = fillStyle;
           ctx.fill();
         }
-      }
-
-      function drawWoodGrain(x, y, w, h, seed) {
-        ctx.save();
-        ctx.strokeStyle = 'rgba(120, 66, 24, 0.22)';
-        ctx.lineWidth = 2;
-        const step = 18;
-        for (let gx = x + 8; gx < x + w - 4; gx += step) {
-          ctx.beginPath();
-          ctx.moveTo(gx, y);
-          const wave = Math.sin(seed + gx * 0.05) * 6;
-          ctx.bezierCurveTo(
-            gx + wave,
-            y + h * 0.33,
-            gx - wave,
-            y + h * 0.66,
-            gx + (seed % 5) - 2,
-            y + h
-          );
+        if (strokeStyle) {
+          ctx.strokeStyle = strokeStyle;
           ctx.stroke();
         }
-        ctx.restore();
       }
 
-      function drawGate(g, m, camX, isActive, isDone) {
-        const shakeX = g.shake > 0 ? Math.sin(g.shake * 38) * 7 * g.shake : 0;
-        const frontX = g.x - GATE_THICKNESS / 2 - camX + shakeX;
-        const backX = g.x + GATE_THICKNESS / 2 - camX + shakeX;
+      function drawSpotlight(W, H) {
+        const sx = W * 0.85;
+        const sy = H * 0.08;
+        const rad = Math.max(W, H) * 0.24;
+        const glow = ctx.createRadialGradient(sx, sy, 4, sx, sy, rad);
+        glow.addColorStop(0, 'rgba(255, 255, 255, 0.96)');
+        glow.addColorStop(0.16, 'rgba(255, 252, 240, 0.65)');
+        glow.addColorStop(0.45, 'rgba(255, 248, 225, 0.18)');
+        glow.addColorStop(1, 'rgba(255, 248, 225, 0)');
+        ctx.fillStyle = glow;
+        ctx.fillRect(sx - rad, sy - rad, rad * 2, rad * 2);
+      }
 
-        if (backX + m.boardWidth < -40 || frontX > m.width + 60) return;
+      function drawPerspectiveRoad(camZ, W, H) {
+        const zNear = Math.max(-240, camZ - 140);
+        const zFar = camZ + 2200;
 
-        // Board visual geometry:
-        // Front edge matches physics collision plane `frontX`!
-        // Right side extends across `GATE_THICKNESS` + angled 2.5D face (`boardWidth`).
-        const boardTop = 20;
-        const boardH = m.groundY - boardTop - 4;
-        const faceW = m.boardWidth;
-        const holeScreenX = g.x - camX + shakeX;
-        const holeY = g.holeY;
-        const holeR = g.holeRadius;
+        // 1. Grey asphalt road surface
+        const aFL = project3D(-ROAD_HALF_W, 0, zNear, camZ, W, H);
+        const aFR = project3D(ROAD_HALF_W, 0, zNear, camZ, W, H);
+        const aBR = project3D(ROAD_HALF_W, 0, zFar, camZ, W, H);
+        const aBL = project3D(-ROAD_HALF_W, 0, zFar, camZ, W, H);
 
-        ctx.save();
-        if (isDone) ctx.globalAlpha = 0.72;
+        const roadGrad = ctx.createLinearGradient(aFL.x, aFL.y, aBR.x, aBR.y);
+        roadGrad.addColorStop(0, '#626770');
+        roadGrad.addColorStop(1, '#3b3f47');
+        fillQuad(aFL, aFR, aBR, aBL, roadGrad);
 
-        // 1. Front extruded left edge (shows plank thickness aligned right at frontX)
-        const sideW = 14;
-        const sideGrad = ctx.createLinearGradient(frontX, 0, frontX + sideW, 0);
-        sideGrad.addColorStop(0, '#8d5b32');
-        sideGrad.addColorStop(1, '#b57b49');
-        ctx.fillStyle = sideGrad;
-        ctx.fillRect(frontX, boardTop, sideW, boardH);
+        // 2. White dashed center lane lines scrolling cleanly in 3D world Z
+        const dashPeriod = 140;
+        const dashLen = 72;
+        const firstDash = Math.floor(zNear / dashPeriod) * dashPeriod;
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.88)';
+        for (let z = firstDash; z < zFar; z += dashPeriod) {
+          const z0 = Math.max(zNear, z);
+          const z1 = Math.min(zFar, z + dashLen);
+          if (z1 <= z0) continue;
+          const dFL = project3D(-8, 0.5, z0, camZ, W, H);
+          const dFR = project3D(8, 0.5, z0, camZ, W, H);
+          const dBR = project3D(8, 0.5, z1, camZ, W, H);
+          const dBL = project3D(-8, 0.5, z1, camZ, W, H);
+          fillQuad(dFL, dFR, dBR, dBL, 'rgba(255, 255, 255, 0.88)');
+        }
 
-        // 2. Main wooden face with circular hole punched out using evenodd rule
-        const faceLeft = frontX + sideW - 1;
-        const faceRight = faceLeft + faceW;
-        const holeDrawX = Math.max(faceLeft + holeR + 6, Math.min(faceRight - holeR - 6, holeScreenX + 24));
+        // 3. Left raised white tiled sidewalk curb + brown inner bevel
+        const curbOuterX = -ROAD_HALF_W - 52;
+        const curbInnerX = -ROAD_HALF_W;
+        const curbMidX = -ROAD_HALF_W - 26;
+        const curbH = 14;
 
-        // 3D inner tunnel rim crescent inside the transparent circular cutout
+        // Brown curb side wall facing the asphalt
+        const wFL = project3D(curbInnerX, 0, zNear, camZ, W, H);
+        const wTL = project3D(curbInnerX, curbH, zNear, camZ, W, H);
+        const wTR = project3D(curbInnerX, curbH, zFar, camZ, W, H);
+        const wBR = project3D(curbInnerX, 0, zFar, camZ, W, H);
+        fillQuad(wFL, wTL, wTR, wBR, '#7c5338');
+
+        // White top sidewalk strip
+        const cFL = project3D(curbOuterX, curbH, zNear, camZ, W, H);
+        const cFR = project3D(curbInnerX, curbH, zNear, camZ, W, H);
+        const cBR = project3D(curbInnerX, curbH, zFar, camZ, W, H);
+        const cBL = project3D(curbOuterX, curbH, zFar, camZ, W, H);
+        const curbGrad = ctx.createLinearGradient(cFL.x, cFL.y, cBR.x, cBR.y);
+        curbGrad.addColorStop(0, '#f1f5f9');
+        curbGrad.addColorStop(1, '#cbd5e1');
+        fillQuad(cFL, cFR, cBR, cBL, curbGrad);
+
+        // Sidewalk tile grid lines (1 longitudinal split + transverse joints)
+        ctx.strokeStyle = 'rgba(100, 116, 139, 0.45)';
+        ctx.lineWidth = 1.4;
+        const mF = project3D(curbMidX, curbH, zNear, camZ, W, H);
+        const mB = project3D(curbMidX, curbH, zFar, camZ, W, H);
+        ctx.beginPath();
+        ctx.moveTo(mF.x, mF.y);
+        ctx.lineTo(mB.x, mB.y);
+        ctx.stroke();
+
+        const tileStep = 42;
+        const firstTile = Math.floor(zNear / tileStep) * tileStep;
+        for (let z = firstTile; z < zFar; z += tileStep) {
+          if (z < zNear) continue;
+          const p0 = project3D(curbOuterX, curbH, z, camZ, W, H);
+          const p1 = project3D(curbInnerX, curbH, z, camZ, W, H);
+          ctx.beginPath();
+          ctx.moveTo(p0.x, p0.y);
+          ctx.lineTo(p1.x, p1.y);
+          ctx.stroke();
+        }
+      }
+
+      function drawWoodPlank3D(minX, maxX, botY, topY, frontZ, backZ, camZ, W, H, labelText, isDone) {
+        const flb = project3D(minX, botY, frontZ, camZ, W, H);
+        const frb = project3D(maxX, botY, frontZ, camZ, W, H);
+        const flt = project3D(minX, topY, frontZ, camZ, W, H);
+        const frt = project3D(maxX, topY, frontZ, camZ, W, H);
+
+        const blb = project3D(minX, botY, backZ, camZ, W, H);
+        const brb = project3D(maxX, botY, backZ, camZ, W, H);
+        const blt = project3D(minX, topY, backZ, camZ, W, H);
+        const brt = project3D(maxX, topY, backZ, camZ, W, H);
+
+        // 1. Right side 3D thickness face (visible when board lies left of vanishing point)
+        if (brt.x > frt.x) {
+          fillQuad(frb, brb, brt, frt, '#8c5a32', 'rgba(72, 42, 18, 0.45)');
+        }
+        // Left side 3D thickness face (in case wide aspect ever shifts)
+        if (blt.x < flt.x) {
+          fillQuad(flb, blb, blt, flt, '#9e683b', 'rgba(72, 42, 18, 0.45)');
+        }
+
+        // 2. Top thickness face (for lower plank when below horizon)
+        if (blt.y < flt.y) {
+          fillQuad(flt, frt, brt, blt, '#e0b282', 'rgba(92, 54, 24, 0.4)');
+        }
+
+        // 3. Bottom thickness face (for upper plank when above horizon)
+        if (blb.y > flb.y) {
+          fillQuad(flb, frb, brb, blb, '#7a4b26', 'rgba(60, 34, 14, 0.5)');
+        }
+
+        // 4. Front oak-textured face (screen-aligned rectangle at frontZ)
+        const fx = flt.x;
+        const fy = flt.y;
+        const fw = Math.max(1, frt.x - flt.x);
+        const fh = Math.max(1, flb.y - flt.y);
+
         ctx.save();
         ctx.beginPath();
-        ctx.arc(holeDrawX, holeY, holeR, 0, Math.PI * 2);
+        ctx.rect(fx, fy, fw, fh);
         ctx.clip();
-        ctx.strokeStyle = '#6f421d';
-        ctx.lineWidth = 10;
-        ctx.beginPath();
-        ctx.arc(holeDrawX - 5, holeY + 2, holeR + 2, 0, Math.PI * 2);
-        ctx.stroke();
+        ctx.drawImage(woodTex, fx, fy, fw, fh);
+
+        // Subtle highlight edge on front slab
+        ctx.strokeStyle = 'rgba(255, 232, 200, 0.4)';
+        ctx.lineWidth = 1.5;
+        ctx.strokeRect(fx + 0.5, fy + 0.5, fw - 1, fh - 1);
+
+        // Label near the lower center of the upper plank ("Do", "Re", ...)
+        if (labelText) {
+          const cx = fx + fw * 0.5;
+          const cy = fy + fh - Math.min(fh * 0.24, Math.max(24, fw * 0.24));
+          const fontSize = clamp(Math.round(fw * 0.34), 16, 62);
+          ctx.font = `900 ${fontSize}px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`;
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.lineJoin = 'round';
+          ctx.lineWidth = Math.max(3, fontSize * 0.14);
+          ctx.strokeStyle = '#18181b';
+          ctx.strokeText(labelText, cx, cy);
+          ctx.fillStyle = isDone ? '#86efac' : '#ffffff';
+          ctx.fillText(labelText, cx, cy);
+        }
         ctx.restore();
+      }
+
+      function drawGate3D(g, camZ, W, H, isActive, isDone) {
+        const dz = g.z - camZ;
+        if (dz < -180 || dz > 2200) return;
+
+        const shakeX = g.shake > 0 ? Math.sin(g.shake * 42) * 14 * g.shake : 0;
+        const frontZ = g.z - GATE_THICKNESS / 2;
+        const backZ = g.z + GATE_THICKNESS / 2;
+        const minX = -BOARD_HALF_W + shakeX;
+        const maxX = BOARD_HALF_W + shakeX;
+        const lowerTop = Math.max(8, g.holeY - g.holeRadius);
+        const upperBot = Math.min(BOARD_TOP_Y - 20, g.holeY + g.holeRadius);
+
+        ctx.save();
+        if (isDone) ctx.globalAlpha = 0.6;
+
+        // 1. 3D Wooden Hoop / Cutout Crescent in the open gap (camera shows right through center!)
+        const hFront = project3D(shakeX, g.holeY, frontZ, camZ, W, H);
+        const hBack = project3D(shakeX, g.holeY, backZ, camZ, W, H);
+        const rFront = g.holeRadius * hFront.scale;
+        const rBack = g.holeRadius * hBack.scale;
 
         ctx.save();
         ctx.beginPath();
-        ctx.rect(faceLeft, boardTop, faceW, boardH);
-        ctx.arc(holeDrawX, holeY, holeR, 0, Math.PI * 2, true);
-        ctx.clip('evenodd');
-
-        const woodGrad = ctx.createLinearGradient(faceLeft, boardTop, faceRight, boardTop + boardH);
-        woodGrad.addColorStop(0, '#dfb07e');
-        woodGrad.addColorStop(0.5, '#cf9963');
-        woodGrad.addColorStop(1, '#b97e49');
-        ctx.fillStyle = woodGrad;
-        ctx.fillRect(faceLeft, boardTop, faceW, boardH);
-
-        drawWoodGrain(faceLeft, boardTop, faceW, boardH, g.index * 7 + 3);
-
-        // Subtle plank border highlight
-        ctx.strokeStyle = isActive ? 'rgba(255, 224, 130, 0.85)' : 'rgba(255, 235, 205, 0.35)';
-        ctx.lineWidth = isActive ? 3 : 1.5;
-        ctx.strokeRect(faceLeft + 1, boardTop + 1, faceW - 2, boardH - 2);
-        ctx.restore();
-
-        // 4. Crisp rim around the hole & alignment guide indicator
-        ctx.beginPath();
-        ctx.arc(holeDrawX, holeY, holeR, 0, Math.PI * 2);
-        ctx.strokeStyle = isActive ? '#fef08a' : 'rgba(92, 52, 20, 0.75)';
-        ctx.lineWidth = isActive ? 3 : 2;
+        ctx.arc(hBack.x, hBack.y, rBack, 0, Math.PI * 2);
+        ctx.strokeStyle = isActive ? 'rgba(235, 185, 130, 0.92)' : 'rgba(180, 128, 82, 0.78)';
+        ctx.lineWidth = Math.max(3, 8 * hBack.scale);
         ctx.stroke();
 
-        // Subtle dashed pitch alignment guide line at frontX when active
-        if (isActive) {
-          ctx.save();
-          ctx.setLineDash([6, 6]);
-          ctx.strokeStyle = 'rgba(254, 240, 138, 0.45)';
-          ctx.lineWidth = 2;
-          ctx.beginPath();
-          ctx.moveTo(0, holeY);
-          ctx.lineTo(frontX, holeY);
-          ctx.stroke();
-          ctx.restore();
-        }
+        // Crescent shadow highlight on inner rim
+        ctx.beginPath();
+        ctx.arc(hFront.x, hFront.y, rFront, -Math.PI * 0.45, Math.PI * 0.45);
+        ctx.strokeStyle = isActive ? 'rgba(255, 228, 180, 0.95)' : 'rgba(215, 165, 110, 0.7)';
+        ctx.lineWidth = Math.max(2, 5 * hFront.scale);
+        ctx.stroke();
+        ctx.restore();
 
-        // 5. Bold note label ("Do", "Re", ...) centered above the hole
-        const labelX = faceLeft + faceW * 0.5;
-        const spaceAbove = holeY - holeR - boardTop;
-        const labelY = spaceAbove >= 52 ? holeY - holeR - 28 : holeY + holeR + 40;
-        const fontSize = clamp(Math.round(faceW * 0.34), 30, 52);
+        // 2. Lower 3D Wooden Block sitting on the road
+        drawWoodPlank3D(minX, maxX, 0, lowerTop, frontZ, backZ, camZ, W, H, null, isDone);
 
-        ctx.font = `900 ${fontSize}px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`;
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.lineJoin = 'round';
-        ctx.lineWidth = 7;
-        ctx.strokeStyle = '#1e1b18';
-        ctx.strokeText(g.name, labelX, labelY);
-        ctx.fillStyle = isDone ? '#86efac' : '#ffffff';
-        ctx.fillText(g.name, labelX, labelY);
+        // 3. Upper 3D Wooden Block with bold Do..Si label
+        drawWoodPlank3D(minX, maxX, upperBot, BOARD_TOP_Y, frontZ, backZ, camZ, W, H, g.name, isDone);
 
         ctx.restore();
       }
 
-      function drawFluffyBall(state) {
+      function drawFluffyBall3D(state, W, H) {
         const ball = state.ball;
-        const sx = ball.x - state.camX;
-        const sy = ball.y;
-        const r = ball.radius;
+        const pCenter = project3D(ball.x, ball.y, ball.z, state.camZ, W, H);
+        const pGround = project3D(ball.x, 0.5, ball.z, state.camZ, W, H);
+        const r = ball.radius * pCenter.scale;
 
+        // Ground shadow projected on road surface
+        const heightNorm = clamp((ball.y - BALL_RADIUS) / 420, 0, 1);
         ctx.save();
-        ctx.translate(sx, sy);
-
-        // Ground shadow on track
-        const heightRatio = clamp((state.metrics.groundY - sy) / (state.metrics.height * 0.6), 0, 1);
-        ctx.save();
-        ctx.translate(0, state.metrics.groundY - sy + 2);
-        ctx.scale(1 - heightRatio * 0.45, 0.25);
-        ctx.fillStyle = `rgba(0, 0, 0, ${0.42 - heightRatio * 0.26})`;
+        ctx.translate(pGround.x, pGround.y);
+        ctx.scale(1.1 - heightNorm * 0.45, 0.34);
+        ctx.fillStyle = `rgba(0, 0, 0, ${0.46 - heightNorm * 0.28})`;
         ctx.beginPath();
         ctx.arc(0, 0, r * 1.15, 0, Math.PI * 2);
         ctx.fill();
         ctx.restore();
 
-        // Squash & stretch on impact
+        // Fluffy orange pom-pom sprite with squash/stretch & subtle roll
+        const spriteSize = r * (220 / 74);
         const sq = ball.squash;
-        const scaleX = 1 - sq * 0.26;
-        const scaleY = 1 + sq * 0.22;
-        ctx.scale(scaleX, scaleY);
-
-        // Fuzzy orange fiber ring
-        const spikes = 26;
         ctx.save();
-        ctx.rotate(ball.rot * 0.45);
-        for (let i = 0; i < spikes; i++) {
-          const ang = (i / spikes) * Math.PI * 2;
-          const len = r + 3.5 + Math.sin(i * 3.7 + ball.rot * 2) * 2.5;
-          ctx.strokeStyle = i % 2 === 0 ? '#ea580c' : '#fb923c';
-          ctx.lineWidth = 3.2;
-          ctx.lineCap = 'round';
-          ctx.beginPath();
-          ctx.moveTo(Math.cos(ang) * (r - 4), Math.sin(ang) * (r - 4));
-          ctx.lineTo(Math.cos(ang) * len, Math.sin(ang) * len);
-          ctx.stroke();
-        }
-        ctx.restore();
-
-        // Main spherical orange pom-pom body
-        const grad = ctx.createRadialGradient(-r * 0.3, -r * 0.3, r * 0.15, 0, 0, r);
-        grad.addColorStop(0, '#fdba74');
-        grad.addColorStop(0.55, '#f97316');
-        grad.addColorStop(1, '#c2410c');
-        ctx.fillStyle = grad;
-        ctx.beginPath();
-        ctx.arc(0, 0, r, 0, Math.PI * 2);
-        ctx.fill();
-
-        // Cute determined eyes looking right
-        const eyeOffsetX = r * 0.28;
-        const eyeOffsetY = -r * 0.12;
-        const eyeR = Math.max(3, r * 0.17);
-        ctx.fillStyle = '#ffffff';
-        ctx.beginPath();
-        ctx.arc(eyeOffsetX - r * 0.16, eyeOffsetY, eyeR, 0, Math.PI * 2);
-        ctx.arc(eyeOffsetX + r * 0.22, eyeOffsetY, eyeR, 0, Math.PI * 2);
-        ctx.fill();
-
-        ctx.fillStyle = '#111827';
-        ctx.beginPath();
-        ctx.arc(eyeOffsetX - r * 0.12, eyeOffsetY, eyeR * 0.52, 0, Math.PI * 2);
-        ctx.arc(eyeOffsetX + r * 0.26, eyeOffsetY, eyeR * 0.52, 0, Math.PI * 2);
-        ctx.fill();
-
+        ctx.translate(pCenter.x, pCenter.y);
+        ctx.scale(1 + sq * 0.16, 1 - sq * 0.24);
+        ctx.rotate(ball.rot * 0.35);
+        ctx.drawImage(pomPomTex, -spriteSize / 2, -spriteSize / 2, spriteSize, spriteSize);
         ctx.restore();
       }
 
-      function drawParticles(state) {
+      function drawParticles3D(state, W, H) {
         for (let i = 0; i < state.particles.length; i++) {
           const p = state.particles[i];
-          const alpha = clamp(p.life / p.maxLife, 0, 1);
-          ctx.globalAlpha = alpha;
+          const sp = project3D(p.x, p.y, p.z, state.camZ, W, H);
+          ctx.globalAlpha = clamp(p.life / p.maxLife, 0, 1);
           ctx.fillStyle = p.color;
           ctx.beginPath();
-          ctx.arc(p.x - state.camX, p.y, p.size, 0, Math.PI * 2);
+          ctx.arc(sp.x, sp.y, Math.max(1.5, p.size * sp.scale), 0, Math.PI * 2);
           ctx.fill();
         }
         ctx.globalAlpha = 1;
       }
 
-      function renderGame() {
-        const m = state.metrics;
-        ctx.clearRect(0, 0, m.width, m.height);
-        drawBackgroundAndRoad(m, state.camX);
+      function renderScene() {
+        ctx.clearRect(0, 0, viewW, viewH);
 
-        // Draw boards back-to-front so closer boards cleanly overlap distant ones
+        drawSpotlight(viewW, viewH);
+        drawPerspectiveRoad(state.camZ, viewW, viewH);
+
+        // Depth-sort gates and ball back-to-front along Z
+        let ballDrawn = false;
         for (let i = state.gates.length - 1; i >= 0; i--) {
-          drawGate(state.gates[i], m, state.camX, i === state.stage && !state.won, i < state.stage);
+          const g = state.gates[i];
+          if (!ballDrawn && state.ball.z > g.z) {
+            drawFluffyBall3D(state, viewW, viewH);
+            ballDrawn = true;
+          }
+          drawGate3D(g, state.camZ, viewW, viewH, i === state.stage && !state.won, i < state.stage);
+        }
+        if (!ballDrawn) {
+          drawFluffyBall3D(state, viewW, viewH);
         }
 
-        drawFluffyBall(state);
-        drawParticles(state);
+        drawParticles3D(state, viewW, viewH);
       }
 
-      // =======================================================================
-      // 8. Main Animation Loop & Event Bindings
-      // =======================================================================
+      // -----------------------------------------------------------------------
+      // Main Animation Loop & Bindings
+      // -----------------------------------------------------------------------
       function frame(now) {
         const dt = (now - lastFrameTime) / 1000;
         lastFrameTime = now;
@@ -1683,9 +1561,9 @@
         const prevStage = state.stage;
         updateAudio(Math.min(dt, 0.05));
         stepPhysics(state, dt);
-        renderGame();
+        renderScene();
 
-        if (state.stage !== prevStage || state.started) {
+        if (state.stage !== prevStage) {
           updateHudIndicators();
         }
 
@@ -1701,6 +1579,7 @@
       }
 
       btnStartGame.addEventListener('click', startMedia);
+      btnSensitivity.addEventListener('click', cycleSensitivity);
       btnPlayTarget.addEventListener('click', playTargetTone);
       btnCalibrateDo.addEventListener('click', startCalibration);
       btnReset.addEventListener('click', () => resetGame());
@@ -1717,6 +1596,7 @@
       window.addEventListener('resize', resizeCanvas);
 
       buildStageStrip();
+      updateHudIndicators();
       resizeCanvas();
       requestAnimationFrame(frame);
     }
